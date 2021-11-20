@@ -1,3 +1,6 @@
+
+const axios = require("axios");
+
 "use strict";
 
 /**
@@ -35,7 +38,28 @@ module.exports = {
 				path: "/hello"
 			},
 			async handler() {
-				return "Hello Moleculer";
+				try{
+
+					const baseurl = "https://api.openweathermap.org";
+					const clientID = "b3a423e8db7ac836addc5be83f0e7fd9";
+				  	const city = city;
+     
+					const wheather = await axios.get(`${baseUrl}/data/2.5/weather?q=${city}&appid=${clientID}&lang=tr&units=metric`);
+				 const  {weather,main} = wheather.data;
+			 
+				 const {description} = weather[0];
+			 
+				   console.log();
+				   return 
+			 
+			 
+			   
+				 
+				 }catch(err){  
+					 console.log(err.response);
+				   
+				 }
+			 
 			}
 		},
 
@@ -51,7 +75,28 @@ module.exports = {
 			},
 			/** @param {Context} ctx  */
 			async handler(ctx) {
-				return `Welcome, ${ctx.params.name}`;
+				try{
+
+					const baseurl = "https://api.openweathermap.org";
+					const clientID = "b3a423e8db7ac836addc5be83f0e7fd9";
+				  	const city = ctx.params.name;
+     
+					const wheather = await axios.get(`${baseurl}/data/2.5/weather?q=${city}&appid=${clientID}&lang=tr&units=metric`);
+				 const  {weather,main} = wheather.data;
+			 
+				 const {description} = weather[0];
+			 
+				
+				  return "Hissedilen sıcaklık " + main.temp_max + " " + description
+			 
+			 
+			   
+				 
+				 }catch(err){  
+					 console.log(err.response);
+				   
+				 }
+			
 			}
 		}
 	},

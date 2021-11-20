@@ -1,25 +1,29 @@
 "use strict";
 
 const DbMixin = require("../mixins/db.mixin");
+const authcontrol = require("./api.service")
+const MyAuthMixin = require("./../mixins/auth.mixin");
+//desturctıon
+
+
+// const {methods} = authcontrol;
+	
+			
+
 
 /**
  * @typedef {import('moleculer').Context} Context Moleculer's Context
  */
 
 module.exports = {
+	
 	name: "products",
-	// version: 1
+	
+	mixins: [MyAuthMixin,DbMixin("products")],
 
-	/**
-	 * Mixins
-	 */
-	mixins: [DbMixin("products")],
 
-	/**
-	 * Settings
-	 */
 	settings: {
-		// Available fields in the responses
+		
 		fields: [
 			"_id",
 			"name",
@@ -27,7 +31,7 @@ module.exports = {
 			"price"
 		],
 
-		// Validator for the `create` & `insert` actions.
+		
 		entityValidator: {
 			name: "string|min:3",
 			price: "number|positive"
@@ -39,15 +43,20 @@ module.exports = {
 	 */
 	hooks: {
 		before: {
+			
 			/**
 			 * Register a before hook for the `create` action.
 			 * It sets a default value for the quantity field.
 			 *
 			 * @param {Context} ctx
 			 */
-			create(ctx) {
+			create(ctx) {//ctx benım contextım ekledıgım şey
+				
 				ctx.params.quantity = 0;
-			}
+			},
+			"*": ["checkIsAuthenticated"],
+		
+
 		}
 	},
 
@@ -55,22 +64,8 @@ module.exports = {
 	 * Actions
 	 */
 	actions: {
-		/**
-		 * The "moleculer-db" mixin registers the following actions:
-		 *  - list
-		 *  - find
-		 *  - count
-		 *  - create
-		 *  - insert
-		 *  - update
-		 *  - remove
-		 */
-
-		// --- ADDITIONAL ACTIONS ---
-
-		/**
-		 * Increase the quantity of the product item.
-		 */
+	
+	
 		increaseQuantity: {
 			rest: "PUT /:id/quantity/increase",
 			params: {
@@ -78,17 +73,19 @@ module.exports = {
 				value: "number|integer|positive"
 			},
 			async handler(ctx) {
+
+			
 				const doc = await this.adapter.updateById(ctx.params.id, { $inc: { quantity: ctx.params.value } });
 				const json = await this.transformDocuments(ctx, ctx.params, doc);
 				await this.entityChanged("updated", json, ctx);
 
-				return json;
+				
+				return `${json.quantity} adet eklendi toplam tutar ${json.price*json.quantity}` ;
 			}
 		},
 
-		/**
-		 * Decrease the quantity of the product item.
-		 */
+
+	
 		decreaseQuantity: {
 			rest: "PUT /:id/quantity/decrease",
 			params: {

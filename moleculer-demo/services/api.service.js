@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken")
 "use strict";
 
 const ApiGateway = require("moleculer-web");
@@ -38,10 +39,10 @@ module.exports = {
 				mergeParams: true,
 
 				// Enable authentication. Implement the logic into `authenticate` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authentication
-				authentication: false,
+				authentication: true,
 
 				// Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
-				authorization: false,
+				authorization: true,
 
 				// The auto-alias feature allows you to declare your route alias directly in your services.
 				// The gateway will dynamically build the full routes from service schema.
@@ -129,28 +130,28 @@ module.exports = {
 		 * @param {IncomingRequest} req
 		 * @returns {Promise}
 		 */
-		async authenticate(ctx, route, req) {
-			// Read the token from header
-			const auth = req.headers["authorization"];
+		async authenticate(req) {
+		
+			// const auth = req.headers["authorization"];
 
-			if (auth && auth.startsWith("Bearer")) {
-				const token = auth.slice(7);
+			// if (auth && auth.startsWith("Bearer")) {
+			// 	const token = auth.slice(7);
 
-				// Check the token. Tip: call a service which verify the token. E.g. `accounts.resolveToken`
-				if (token == "123456") {
-					// Returns the resolved user. It will be set to the `ctx.meta.user`
-					return { id: 1, name: "John Doe" };
+			// 	// Check the token. Tip: call a service which verify the token. E.g. `accounts.resolveToken`
+			// 	if (token == "123456") {
+			// 		// Returns the resolved user. It will be set to the `ctx.meta.user`
+			// 		return { id: 1, name: "John Doe" };
 
-				} else {
-					// Invalid token
-					throw new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_INVALID_TOKEN);
-				}
+			// 	} else {
+			// 		// Invalid token
+			// 		throw new ApiGateway.Errors.UnAuthorizedError(ApiGateway.Errors.ERR_INVALID_TOKEN);
+			// 	}
 
-			} else {
-				// No token. Throw an error or do nothing if anonymous access is allowed.
-				// throw new E.UnAuthorizedError(E.ERR_NO_TOKEN);
-				return null;
-			}
+			// } else {
+			// 	// No token. Throw an error or do nothing if anonymous access is allowed.
+			// 	// throw new E.UnAuthorizedError(E.ERR_NO_TOKEN);
+			// 	return null;
+			// }
 		},
 
 		/**
@@ -164,13 +165,16 @@ module.exports = {
 		 * @returns {Promise}
 		 */
 		async authorize(ctx, route, req) {
-			// Get the authenticated user.
-			const user = ctx.meta.user;
 
-			// It check the `auth` property in action schema.
-			if (req.$action.auth == "required" && !user) {
-				throw new ApiGateway.Errors.UnAuthorizedError("NO_RIGHTS");
-			}
+			const token = await  jwt.sign({name:ctx.params.name}, 'sadsfdsfsd',{ expiresIn: 60 * 60 }, { algorithm: 'RS256'});
+			
+		
+	
+		 ctx.meta.user = token
+
+		
+
+			
 		}
 
 	}
